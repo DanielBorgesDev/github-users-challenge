@@ -1,0 +1,42 @@
+package com.example.github_users.service;
+
+
+import com.example.github_users.domain.User;
+import com.example.github_users.repository.UserRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+@Component
+public class GithubSyncService implements CommandLineRunner {
+
+  private final UserRepository userRepository;
+  private final RestTemplate restTemplate = new RestTemplate();
+
+  public GithubSyncService(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  record GithubUserDto(String login, String url) {}
+
+  @Override
+  public void run(String... args) {
+    String endpoint = "https://api.github.com/users?per_page=30";
+    ResponseEntity<GithubUserDto[]> resp =
+        restTemplate.getForEntity(endpoint, GithubUserDto[].class);
+
+    if (resp.getBody() != null) {
+      for (GithubUserDto dto : resp.getBody()) {
+        if (!userRepository.existsByLogin(dto.login())) {
+          User u = new User();
+          u.setLogin(dto.login());
+          // o enunciado pede salvar "url" — o campo 'url' da API é a URL de API,
+          // não 'html_url'. Usamos exatamente 'url' para cumprir o requisito.
+          u.setUrl(dto.url());
+          userRepository.save(u);
+        }
+      }
+    }
+  }
+}
