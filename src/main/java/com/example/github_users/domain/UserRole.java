@@ -18,7 +18,6 @@ public class UserRole {
   @JoinColumn(name = "role_id", nullable = false)
   private Role role;
 
-  // getters/setters
   public Long getId() { return id; }
   public User getUser() { return user; }
   public Role getRole() { return role; }

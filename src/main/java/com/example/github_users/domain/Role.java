@@ -15,7 +15,6 @@ public class Role {
   @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<UserRole> userRoles = new HashSet<>();
 
-  // getters/setters
   public Long getId() { return id; }
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }

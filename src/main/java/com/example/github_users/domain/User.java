@@ -18,7 +18,6 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<UserRole> userRoles = new HashSet<>();
 
-  // getters/setters
 
   public Long getId() { return id; }
   public String getLogin() { return login; }
