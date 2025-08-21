@@ -1,6 +1,5 @@
 package com.example.github_users.controller;
 
-
 import com.example.github_users.domain.User;
 import com.example.github_users.dto.RoleResponse;
 import com.example.github_users.dto.UserResponse;
@@ -14,34 +13,33 @@ import java.util.List;
 @RequestMapping("/users")
 public class UsersController {
 
-  private final UserService userService;
+    private final UserService userService;
 
-  public UsersController(UserService userService) {
-    this.userService = userService;
-  }
+    public UsersController(UserService userService) {
+        this.userService = userService;
+    }
 
-  // Listar todos os usuários com suas roles
-  @GetMapping
-  public ResponseEntity<List<UserResponse>> list() {
-    List<User> users = userService.listUsersWithRoles();
-    var payload = users.stream().map(u ->
-        new UserResponse(
-            u.getId(),
-            u.getLogin(),
-            u.getUrl(),
-            u.getUserRoles().stream()
-              .map(ur -> new RoleResponse(ur.getRole().getId(), ur.getRole().getName()))
-              .distinct()
-              .toList()
-        )
-    ).toList();
-    return ResponseEntity.ok(payload);
-  }
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> list() {
+        List<User> users = userService.listUsersWithRoles();
+        var payload = users.stream().map(u ->
+            new UserResponse(
+                u.getId(),
+                u.getLogin(),
+                u.getUrl(),
+                u.getRoles().stream()
+                  .map(r -> new RoleResponse(r.getId(), r.getName()))
+                  .distinct()
+                  .toList()
+            )
+        ).toList();
+        return ResponseEntity.ok(payload);
+    }
 
-  // Atribuir perfil via URL
-  @PostMapping("/{userId}/roles/{roleId}")
-  public ResponseEntity<Void> assign(@PathVariable Long userId, @PathVariable Long roleId) {
-    userService.assignRole(userId, roleId);
-    return ResponseEntity.noContent().build();
-  }
+    // Atribuir perfil via URL
+    @PostMapping("/{userId}/roles/{roleId}")
+    public ResponseEntity<Void> assign(@PathVariable Long userId, @PathVariable Long roleId) {
+        userService.assignRole(userId, roleId);
+        return ResponseEntity.noContent().build();
+    }
 }

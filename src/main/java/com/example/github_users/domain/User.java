@@ -1,38 +1,39 @@
 package com.example.github_users.domain;
 
 import jakarta.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users") // 🔑 evita conflito com palavra reservada
 public class User {
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private String login;
+    private String login;
 
-  @Column(nullable = false)
-  private String url;
+    // esse campo é o que o GithubSyncService usa → setUrl()
+    private String url;
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Set<UserRole> userRoles = new HashSet<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
+    // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-  public Long getId() { return id; }
-  public String getLogin() { return login; }
-  public String getUrl() { return url; }
-  public void setLogin(String login) { this.login = login; }
-  public void setUrl(String url) { this.url = url; }
+    public String getLogin() { return login; }
+    public void setLogin(String login) { this.login = login; }
 
-  public Set<UserRole> getUserRoles() { return userRoles; }
+    public String getUrl() { return url; }
+    public void setUrl(String url) { this.url = url; }
 
-  @Transient
-  public Set<String> getRoleNames() {
-    Set<String> names = new HashSet<>();
-    for (UserRole ur : userRoles) {
-      if (ur.getRole() != null) names.add(ur.getRole().getName());
-    }
-    return names;
-  }
+    public Set<Role> getRoles() { return roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
 }
